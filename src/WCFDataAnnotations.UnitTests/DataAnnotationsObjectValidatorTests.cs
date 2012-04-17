@@ -16,7 +16,7 @@ namespace WCFDataAnnotations.UnitTests
         public void Setup()
         {
             _validator = new DataAnnotationsObjectValidator();
-        }        
+        }
 
         [Test]
         public void Validate_Does_Not_Return_ValidationResult_When_Passed_Null()
@@ -24,7 +24,7 @@ namespace WCFDataAnnotations.UnitTests
             var result = _validator.Validate(null);
 
             Assert.That(result, Is.Not.Null);
-            Assert.That(result.Any(), Is.False);            
+            Assert.That(result.Any(), Is.False);
         }
 
         [Test]
@@ -39,7 +39,7 @@ namespace WCFDataAnnotations.UnitTests
         [Test]
         public void Validate_Does_Not_Return_ValidationResult_When_Passed_Object_That_Is_Valid()
         {
-            var result = _validator.Validate(new TestClass { Property1 = "hello", Property2 = "12345" });
+            var result = _validator.Validate(new TestClass { Property1 = "hello", Property2 = "12345", Property3 = "test" });
 
             Assert.That(result, Is.Not.Null);
             Assert.That(result.Any(), Is.False);
@@ -48,7 +48,7 @@ namespace WCFDataAnnotations.UnitTests
         [Test]
         public void Validate_Returns_ValidationResult_When_Passed_Object_That_Has_One_Invalid_Property()
         {
-            var result = _validator.Validate(new TestClass { Property1 = null, Property2 = "12345" });
+            var result = _validator.Validate(new TestClass { Property1 = null, Property2 = "12345", Property3 = "test" });
 
             Assert.That(result, Is.Not.Null);
             Assert.That(result.Count(), Is.EqualTo(1));
@@ -58,12 +58,26 @@ namespace WCFDataAnnotations.UnitTests
         [Test]
         public void Validate_Returns_ValidationResult_When_Passed_Object_That_Has_Two_Invalid_Properties()
         {
-            var result = _validator.Validate(new TestClass { Property1 = null, Property2 = "test" });
+            var result = _validator.Validate(new TestClass { Property1 = null, Property2 = "test", Property3 = "test" });
 
             Assert.That(result, Is.Not.Null);
             Assert.That(result.Count(), Is.EqualTo(2));
             Assert.That(result.First().ErrorMessage, Is.StringContaining(ErrorMessage1));
             Assert.That(result.Skip(1).First().ErrorMessage, Is.StringContaining(ErrorMessage2));
+        }
+
+        [Test]
+        public void Validate_PropertyWithNoErrorMessage_CreatesErrorMessage()
+        {
+            var result = _validator.Validate(new TestClass { Property1 = null, Property2 = "test", Property3 = "" });
+
+            var validationResults = result.ToList();
+
+            Assert.That(result, Is.Not.Null);
+            Assert.AreEqual(3, validationResults.Count);
+            Assert.That(validationResults[0].ErrorMessage, Is.StringContaining(ErrorMessage1));
+            Assert.That(validationResults[1].ErrorMessage, Is.StringContaining(ErrorMessage2));
+            Assert.That(validationResults[2].ErrorMessage, Is.StringContaining("The Property3 field is required."));
         }
 
         private class TestClass
@@ -73,6 +87,9 @@ namespace WCFDataAnnotations.UnitTests
 
             [RegularExpression(@"\d{1,10}", ErrorMessage = ErrorMessage2)]
             public string Property2 { get; set; }
-        }        
+
+            [Required]
+            public string Property3 { get; set; }
+        }
     }
 }

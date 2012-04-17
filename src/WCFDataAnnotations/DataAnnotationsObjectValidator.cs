@@ -16,7 +16,7 @@ namespace WCFDataAnnotations
                    where !attribute.IsValid(property.GetValue(input))
                    select new ValidationResult
                    (
-                       attribute.FormatErrorMessage(string.Empty),
+                       attribute.FormatErrorMessage(property.Name),
                        new[] { property.Name }
                    );
         }
