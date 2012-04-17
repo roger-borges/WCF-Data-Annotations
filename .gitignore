@@ -28,6 +28,11 @@ _ReSharper*/
 [Tt]humbs.db
 [Tt]est[Rr]esult*
 [Bb]uild[Ll]og.*
+
 *.resharper
+
 *.ncrunchsolution
+*.ncrunchproject
+
+#nuget
 packages/

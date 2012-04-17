@@ -45,9 +45,8 @@
   <ItemGroup>
     <Compile Include="NullCheckObjectValidator.cs" />
     <Compile Include="DataAnnotationsObjectValidator.cs" />
-    <Compile Include="ErrorMessageGenerator.cs" />
-    <Compile Include="IErrorMessageGenerator.cs" />
     <Compile Include="IObjectValidator.cs" />
+    <Compile Include="ObjectValidationException.cs" />
     <Compile Include="ValidatableObjectValidator.cs" />
     <Compile Include="ValidateDataAnnotationsBehavior.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

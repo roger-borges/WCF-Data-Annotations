@@ -15,7 +15,6 @@ namespace WCFDataAnnotations.UnitTests
 
         private Mock<IObjectValidator> _singleValidatorMock;
         private Mock<IObjectValidator> _secondValidatorMock;
-        private Mock<IErrorMessageGenerator> _errorMessageGeneratorMock;
         private ValidatingParameterInspector _singleValidatorParameterInspector;
         private ValidatingParameterInspector _multipleValidatorsParameterInspector;
 
@@ -28,27 +27,20 @@ namespace WCFDataAnnotations.UnitTests
             _secondValidatorMock = new Mock<IObjectValidator>();
             _secondValidatorMock.Setup(x => x.Validate(It.IsAny<object>())).Returns(Enumerable.Empty<ValidationResult>());
 
-            _errorMessageGeneratorMock = new Mock<IErrorMessageGenerator>();
-            _singleValidatorParameterInspector = new ValidatingParameterInspector(new[] { _singleValidatorMock.Object }, _errorMessageGeneratorMock.Object);
-            _multipleValidatorsParameterInspector = new ValidatingParameterInspector(new[] { _singleValidatorMock.Object, _secondValidatorMock.Object }, _errorMessageGeneratorMock.Object);
-        }        
+            _singleValidatorParameterInspector = new ValidatingParameterInspector(new[] { _singleValidatorMock.Object });
+            _multipleValidatorsParameterInspector = new ValidatingParameterInspector(new[] { _singleValidatorMock.Object, _secondValidatorMock.Object });
+        }
 
         [Test]
         public void Must_Be_Supplied_With_Validators()
         {
-            Assert.Throws<ArgumentNullException>(() => new ValidatingParameterInspector(null, null));
+            Assert.Throws<ArgumentNullException>(() => new ValidatingParameterInspector(null));
         }
 
         [Test]
         public void Validators_Cannot_Be_Empty()
         {
-            Assert.Throws<ArgumentException>(() => new ValidatingParameterInspector(Enumerable.Empty<IObjectValidator>(), null));
-        }
-
-        [Test]
-        public void Must_Be_Supplied_With_ErrorMessageGenerator()
-        {
-            Assert.Throws<ArgumentNullException>(() => new ValidatingParameterInspector(new[] { new NullCheckObjectValidator() }, null));
+            Assert.Throws<ArgumentException>(() => new ValidatingParameterInspector(Enumerable.Empty<IObjectValidator>()));
         }
 
         [Test]
@@ -91,43 +83,19 @@ namespace WCFDataAnnotations.UnitTests
         }
 
         [Test]
-        public void BeforeCall_Calls_ErrorMessageGenerator_When_Validator_Returns_ValidationResult()
+        public void BeforeCall_Throw_Exception_When_Validator_Returns_ValidationResult()
         {
             var validationResults = new List<ValidationResult> { new ValidationResult("something bad") };
             _singleValidatorMock.Setup(x => x.Validate(It.IsAny<object>())).Returns(validationResults);
 
-            try
-            {
-                _singleValidatorParameterInspector.BeforeCall(OperationName, new[] { new object() });
-            }
-            catch
-            {                
-                // suppress
-            }
-            
-            _errorMessageGeneratorMock.Verify(x => x.GenerateErrorMessage(OperationName, validationResults), Times.Once());
-        }
-
-        [Test]
-        public void BeforeCall_Throw_Exception_Using_ErrorMessageGenerator_ReturnValue_When_Validator_Returns_ValidationResult()
-        {
-            const string errorMessage = "something really bad";
-
-            var validationResults = new List<ValidationResult> { new ValidationResult("something bad") };
-            _singleValidatorMock.Setup(x => x.Validate(It.IsAny<object>())).Returns(validationResults);
-
-            _errorMessageGeneratorMock.Setup(x => x.GenerateErrorMessage(OperationName, validationResults)).Returns(errorMessage);
-
-            var faultException = Assert.Throws<FaultException>(
-                () => _singleValidatorParameterInspector.BeforeCall(OperationName, new[] {new object()}));
-
-            Assert.That(faultException.Message, Is.EqualTo(errorMessage));
+            var faultException = Assert.Throws<FaultException<ObjectValidationException>>(
+                () => _singleValidatorParameterInspector.BeforeCall(OperationName, new[] { new object() }));
         }
 
         [Test]
         public void BeforeCall_Returns_Null_When_Valid()
         {
-            var result = _singleValidatorParameterInspector.BeforeCall(OperationName, new[] {new object()});
+            var result = _singleValidatorParameterInspector.BeforeCall(OperationName, new[] { new object() });
 
             Assert.That(result, Is.Null);
         }

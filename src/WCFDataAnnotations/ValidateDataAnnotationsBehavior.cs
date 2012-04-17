@@ -22,7 +22,7 @@ namespace WCFDataAnnotations
                                      new ValidatableObjectValidator()
                                  };
 
-            _validatingParameterInspector = new ValidatingParameterInspector(validators, new ErrorMessageGenerator());
+            _validatingParameterInspector = new ValidatingParameterInspector(validators);
         }
 
         public void AddBindingParameters(ServiceDescription serviceDescription, ServiceHostBase serviceHostBase,

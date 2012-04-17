@@ -7,21 +7,19 @@ using System.ServiceModel.Dispatcher;
 
 namespace WCFDataAnnotations
 {
-    public class ValidatingParameterInspector: IParameterInspector
+    public class ValidatingParameterInspector : IParameterInspector
     {
         private readonly IEnumerable<IObjectValidator> _validators;
-        private readonly IErrorMessageGenerator _errorMessageGenerator;
 
-        public ValidatingParameterInspector(IEnumerable<IObjectValidator> validators, IErrorMessageGenerator errorMessageGenerator)
+        public ValidatingParameterInspector(IEnumerable<IObjectValidator> validators)
         {
-            ValidateArguments(validators, errorMessageGenerator);
+            ValidateArguments(validators);
 
             _validators = validators;
-            _errorMessageGenerator = errorMessageGenerator;
         }
 
         public void AfterCall(string operationName, object[] outputs, object returnValue, object correlationState)
-        {            
+        {
         }
 
         public object BeforeCall(string operationName, object[] inputs)
@@ -33,19 +31,21 @@ namespace WCFDataAnnotations
                 foreach (var validator in _validators)
                 {
                     var results = validator.Validate(input);
-                    validationResults.AddRange(results);                    
-                }                                
+                    validationResults.AddRange(results);
+                }
             }
 
             if (validationResults.Count > 0)
             {
-                throw new FaultException(_errorMessageGenerator.GenerateErrorMessage(operationName, validationResults));
+                var objectValidationException = new ObjectValidationException(validationResults);
+
+                throw new FaultException<ObjectValidationException>(objectValidationException);
             }
 
             return null;
         }
 
-        private static void ValidateArguments(IEnumerable<IObjectValidator> validators, IErrorMessageGenerator errorMessageGenerator)
+        private static void ValidateArguments(IEnumerable<IObjectValidator> validators)
         {
             if (validators == null)
             {
@@ -55,11 +55,6 @@ namespace WCFDataAnnotations
             if (!validators.Any())
             {
                 throw new ArgumentException("At least one validator is required.");
-            }
-
-            if (errorMessageGenerator == null)
-            {
-                throw new ArgumentNullException("errorMessageGenerator");
             }
         }
     }

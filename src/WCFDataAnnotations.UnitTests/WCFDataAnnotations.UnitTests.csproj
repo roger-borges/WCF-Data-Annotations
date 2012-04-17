@@ -59,7 +59,6 @@
     <Compile Include="DataAnnotationsObjectValidatorTests.cs" />
     <Compile Include="ValidatableObjectValidatorTests.cs" />
     <Compile Include="NullCheckObjectValidatorTests.cs" />
-    <Compile Include="ErrorMessageGeneratorTests.cs" />
     <Compile Include="ValidatingParameterInspectorTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
