@@ -37,9 +37,10 @@ namespace WCFDataAnnotations
 
             if (validationResults.Count > 0)
             {
-                var objectValidationException = new ObjectValidationException(validationResults);
+                var validationErrors = validationResults.Select(v => new ValidationError { MemberNames = v.MemberNames.ToList(), ErrorMessage = v.ErrorMessage }).ToList();
+                var objectValidationException = new ObjectValidationFault(validationErrors);
 
-                throw new FaultException<ObjectValidationException>(objectValidationException);
+                throw new FaultException<ObjectValidationFault>(objectValidationException);
             }
 
             return null;

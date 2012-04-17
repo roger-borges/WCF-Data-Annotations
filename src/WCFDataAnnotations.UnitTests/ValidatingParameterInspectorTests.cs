@@ -88,7 +88,7 @@ namespace WCFDataAnnotations.UnitTests
             var validationResults = new List<ValidationResult> { new ValidationResult("something bad") };
             _singleValidatorMock.Setup(x => x.Validate(It.IsAny<object>())).Returns(validationResults);
 
-            var faultException = Assert.Throws<FaultException<ObjectValidationException>>(
+            var faultException = Assert.Throws<FaultException<ObjectValidationFault>>(
                 () => _singleValidatorParameterInspector.BeforeCall(OperationName, new[] { new object() }));
         }
 
