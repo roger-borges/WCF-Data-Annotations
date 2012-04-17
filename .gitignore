@@ -29,3 +29,5 @@ _ReSharper*/
 [Tt]est[Rr]esult*
 [Bb]uild[Ll]og.*
 *.resharper
+*.ncrunchsolution
+packages/
