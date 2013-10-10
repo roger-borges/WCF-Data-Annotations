@@ -80,6 +80,21 @@ namespace WCFDataAnnotations.UnitTests
             Assert.That(validationResults[2].ErrorMessage, Is.StringContaining("The Property3 field is required."));
         }
 
+        [Test]
+        public void Validate_MetaData()
+        {
+            var result = _validator.Validate(new TestClassWithMeta { Property1 = null, Property2 = "test", Property3 = "" });
+
+            var validationResults = result.ToList();
+
+            Assert.That(result, Is.Not.Null);
+            Assert.AreEqual(3, validationResults.Count);
+            Assert.That(validationResults[0].ErrorMessage, Is.StringContaining(ErrorMessage1));
+            Assert.That(validationResults[1].ErrorMessage, Is.StringContaining(ErrorMessage2));
+            Assert.That(validationResults[2].ErrorMessage, Is.StringContaining("The Property3 field is required."));
+        }
+
+
         private class TestClass
         {
             [Required(ErrorMessage = ErrorMessage1)]
@@ -90,6 +105,31 @@ namespace WCFDataAnnotations.UnitTests
 
             [Required]
             public string Property3 { get; set; }
+        }
+
+
+        [MetadataType(typeof(SomeMetaData))]
+        public class TestClassWithMeta
+        {
+            public string Property1 { get; set; }
+
+            public string Property2 { get; set; }
+
+            public string Property3 { get; set; }
+
+
+            //[Serializable]
+            public class SomeMetaData
+            {
+                [Required(ErrorMessage = ErrorMessage1)]
+                public object Property1 { get; set; }
+
+                [RegularExpression(@"\d{1,10}", ErrorMessage = ErrorMessage2)]
+                public object Property2 { get; set; }
+
+                [Required]
+                public object Property3 { get; set; }
+            }
         }
     }
 }
